@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.example.onestepbe.mapper.SupportMapper">
+
+    <select id="findAll" resultType="org.example.onestepbe.model.Support">
+        SELECT id, title, category, region, deadline, description
+        FROM support
+        <where>
+            <if test="category != null and category != ''">AND category = #{category}</if>
+            <if test="region != null and region != ''">AND region = #{region}</if>
+        </where>
+        ORDER BY deadline ASC
+    </select>
+
+</mapper>

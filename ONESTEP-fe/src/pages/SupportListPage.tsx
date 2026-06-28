@@ -1,49 +1,20 @@
 import { useState } from 'react'
 import { SupportCard } from '../components/ui/SupportCard'
+import { useSupports } from '../hooks/useSupports'
 
 const FIELDS = ['전체', '주거', '금융', '의료', '교육', '취업', '심리정서', '법률', '기타']
 const REGIONS = ['전국', '서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산']
 const AGES = ['전체', '18~24세', '25~29세', '30~34세']
 
-const DUMMY_SUPPORTS = [
-  {
-    id: '1',
-    title: '자립수당 지원사업',
-    category: '금융',
-    deadline: '2026.07.31',
-    region: '전국',
-    description: '보호종료 후 5년 이내 자립준비청년에게 월 40만 원 자립수당을 지급합니다.',
-  },
-  {
-    id: '2',
-    title: '청년 매입임대주택 공급',
-    category: '주거',
-    deadline: '2026.08.15',
-    region: '서울',
-    description: '자립준비청년을 위한 시세 30% 수준의 매입임대주택을 우선 공급합니다.',
-  },
-  {
-    id: '3',
-    title: '드림스타트 직업훈련',
-    category: '취업',
-    deadline: '2026.09.30',
-    region: '경기',
-    description: '직업 훈련 및 취업 연계 서비스를 통해 안정적인 사회 진입을 지원합니다.',
-  },
-  {
-    id: '4',
-    title: '보호종료아동 의료비 지원',
-    category: '의료',
-    deadline: '2026.12.31',
-    region: '전국',
-    description: '만 24세 이하 보호종료아동의 의료비(입·통원) 전액을 지원합니다.',
-  },
-]
-
 export function SupportListPage() {
   const [selectedField, setSelectedField] = useState('전체')
   const [selectedRegion, setSelectedRegion] = useState('전국')
   const [selectedAge, setSelectedAge] = useState('전체')
+
+  const { data, total, loading, error } = useSupports({
+    category: selectedField,
+    region: selectedRegion,
+  })
 
   const filterTagStyle = (active: boolean): React.CSSProperties => ({
     padding: 'var(--space-2) var(--space-4)',
@@ -176,7 +147,7 @@ export function SupportListPage() {
           marginBottom: 'var(--space-5)',
         }}
       >
-        총 <strong style={{ color: 'var(--color-text-primary)' }}>{DUMMY_SUPPORTS.length}건</strong>의 지원사업이 있습니다.
+        총 <strong style={{ color: 'var(--color-text-primary)' }}>{total}건</strong>의 지원사업이 있습니다.
         {selectedField !== '전체' && ` (분야: ${selectedField})`}
         {selectedRegion !== '전국' && ` (지역: ${selectedRegion})`}
         {selectedAge !== '전체' && ` (나이: ${selectedAge})`}
@@ -190,7 +161,33 @@ export function SupportListPage() {
           gap: 'var(--space-6)',
         }}
       >
-        {DUMMY_SUPPORTS.map((item) => (
+        {loading && (
+          Array.from({ length: 4 }).map((_, i) => (
+            <article
+              key={i}
+              style={{
+                backgroundColor: 'var(--color-surface)',
+                border: '1px solid var(--color-border)',
+                borderRadius: 'var(--border-radius-md)',
+                padding: 'var(--space-6)',
+                boxShadow: 'var(--shadow-sm)',
+                minHeight: 180,
+              }}
+            >
+              <div style={{ background: 'var(--color-border)', borderRadius: 4, height: 20, width: '40%', marginBottom: 'var(--space-3)' }} />
+              <div style={{ background: 'var(--color-border)', borderRadius: 4, height: 24, marginBottom: 'var(--space-3)' }} />
+              <div style={{ background: 'var(--color-border)', borderRadius: 4, height: 16, width: '80%' }} />
+            </article>
+          ))
+        )}
+
+        {!loading && error !== null && (
+          <p style={{ color: 'var(--color-error)', textAlign: 'center', padding: 'var(--space-12) 0' }}>
+            데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
+          </p>
+        )}
+
+        {!loading && error === null && data.map((item) => (
           <SupportCard key={item.id} {...item} />
         ))}
       </div>
